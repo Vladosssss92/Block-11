@@ -50,17 +50,14 @@ const searchForAResource = (search, select, input) => {
       if (data) {
         messageHeader.innerHTML = data.name;
         divInformation.innerHTML = "";
-        for (let element in data) {
-          if (data.hasOwnProperty(element)) {
-            if (Array.isArray(data[element])) {
-              const filmsList = data[element]
-                .map((elem) => `<br>${elem}`)
-                .join("");
-              divInformation.innerHTML += `${element}: ${filmsList}<br>`;
-            } else
-              divInformation.innerHTML += `${element}: ${data[element]}<br>`;
-          }
-        }
+        Object.keys(data).forEach((element) => {
+          if (Array.isArray(data[element])) {
+            const filmsList = data[element]
+              .map((elem) => `<br>${elem}`)
+              .join("");
+            divInformation.innerHTML += `${element}: ${filmsList}<br>`;
+          } else divInformation.innerHTML += `${element}: ${data[element]}<br>`;
+        });
         divContent.style.visibility = "visible";
       }
     })

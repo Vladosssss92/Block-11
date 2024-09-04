@@ -15,16 +15,23 @@ const closeInformation = document.querySelector(".delete");
 const messageHeader = document.querySelector(".message-header>p");
 const divInformation = document.getElementById("content");
 const spinner = document.querySelector(".spinner");
-const select = document.querySelector(".select");
+const selectSearch = document.querySelector(".select-search");
+const selectGetById = document.querySelector(".select-get-by-id");
 let innerText;
+let searchById;
+const notFound = "not found";
 
-const onSearchClick = () => {
-  innerText = inputSearch.value;
+const searchForAResource = (search, select, input) => {
+  innerText = input.value;
   if (innerText === "") return;
   divContent.style.visibility = "hidden";
   spinner.style.visibility = "visible";
-  typeOfSearch(select.value)
-    .then((data) => data.results[0])
+  search(select.value)
+    .then((data) => {
+      if (searchById) {
+        return data;
+      } else return data.results[0];
+    })
     .then((data) => {
       if (data.homeworld) {
         return getPlanetById(data.homeworld).then((planet) => {
@@ -33,7 +40,12 @@ const onSearchClick = () => {
         });
       } else return data;
     })
-    .catch((error) => console.log(error))
+    .catch((error) => {
+      messageHeader.innerHTML = notFound;
+      divInformation.innerHTML = notFound;
+      divContent.style.visibility = "visible";
+      console.log(error);
+    })
     .then((data) => {
       if (data) {
         messageHeader.innerHTML = data.name;
@@ -66,7 +78,7 @@ const typeOfSearch = (type) => {
   }
 };
 
-const getById = (type) => {
+const typeGetById = (type) => {
   switch (type) {
     case "people":
       return starWars.getCharactersById(innerText);
@@ -83,10 +95,20 @@ const getPlanetById = (url) => {
   return starWars.getPlanetsById(planetId).then((data) => data.name);
 };
 
-buttonSearch.addEventListener("click", onSearchClick);
-buttonGetById.addEventListener("click", onSearchClick);
+buttonSearch.addEventListener("click", () => {
+  searchById = false;
+  inputGetById.value = "";
+  searchForAResource(typeOfSearch, selectSearch, inputSearch);
+});
+
+buttonGetById.addEventListener("click", () => {
+  searchById = true;
+  inputSearch.value = "";
+  searchForAResource(typeGetById, selectGetById, inputGetById);
+});
 
 closeInformation.addEventListener("click", () => {
   divContent.style.visibility = "hidden";
   inputSearch.value = "";
+  inputGetById.value = "";
 });
